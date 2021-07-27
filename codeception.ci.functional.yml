@@ -20,8 +20,7 @@ settings:
 
 coverage:
     enabled: true
-    remote: true
-    c3_url: 'http://zed.de.shop-suite.local'
+    remote: false
     whitelist: { include: ['src/Pyz/*.php'] }
 
 extensions:
@@ -31,5 +30,6 @@ extensions:
         \SprykerTest\Shared\Testify\Helper\SuiteFilterHelper:
             exclusive:
                 - Presentation
+                - Controller
                 - Glue
                 - Api

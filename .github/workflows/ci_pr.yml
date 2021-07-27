@@ -15,7 +15,11 @@ env:
 
 jobs:
   unit-tests:
-    name: 'Check code style'
+    name: 'Run unit/functional tests'
+    needs:
+      - code-style
+      - code-architecture
+      - phpstan
     runs-on: ubuntu-20.04
     services:
       database:
@@ -50,4 +54,55 @@ jobs:
         run: vendor/bin/install DE -r ci -s generate -s cache -s database-migrate -s setup-test
       - name: 'Run tests'
         run: vendor/bin/codecept run -c codeception.ci.functional.yml
+
+  code-style:
+    name: 'Check code style'
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          extensions: redis
+          ini-values: memory_limit=-1
+      - name: 'Prepare file system'
+        run: ./config/Shared/ci/ga/prepare_file_system.sh
+      - name: 'Install project'
+        run: vendor/bin/install DE -r ci -s generate -s cache -s setup-test
+      - name: 'Run code:sniff:style'
+        run: vendor/bin/console code:sniff:style
+
+  code-architecture:
+    name: 'Check code architecture'
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          extensions: redis
+          ini-values: memory_limit=-1
+      - name: 'Prepare file system'
+        run: ./config/Shared/ci/ga/prepare_file_system.sh
+      - name: 'Install project'
+        run: vendor/bin/install DE -r ci -s generate -s cache -s setup-test
+      - name: 'Run code:sniff:architecture'
+        run: vendor/bin/console code:sniff:architecture
+
+  phpstan:
+    name: 'Static analysis with PHPStan'
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          extensions: redis
+          ini-values: memory_limit=-1
+      - name: 'Prepare file system'
+        run: ./config/Shared/ci/ga/prepare_file_system.sh
+      - name: 'Install project'
+        run: vendor/bin/install DE -r ci -s generate -s cache -s setup-test
+      - name: 'Run phpstan'
+        run: php -d memory_limit=1024M vendor/bin/console code:phpstan
 
