@@ -58,14 +58,14 @@ jobs:
           php-version: '7.4'
           extensions: redis
           ini-values: memory_limit=-1
-      - name: Configure sysctl limits
-        run: |
-          sudo swapoff -a
-          sudo sysctl -w vm.swappiness=1
-          sudo sysctl -w fs.file-max=262144
-          sudo sysctl -w vm.max_map_count=262144
-      - name: 'Prepare file system'
-        run: ./config/Shared/ci/ga/prepare_file_system.sh
+      - uses: actions/cache@v2
+        id: composer-cache
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+      - name: 'Composer install'
+        if: steps.composer-cache.outputs.cache-hit != 'true'
+        run: composer install --optimize-autoloader --no-interaction
       - name: 'Install project'
         run: vendor/bin/install DE -r ci -s generate -s cache -s database-migrate -s setup-test
       - name: 'Run tests'
