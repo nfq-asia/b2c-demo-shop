@@ -12,6 +12,18 @@ sections:
     rest-api-generate-documentation:
       command: "vendor/bin/console rest-api:generate:documentation"
 
+    propel-copy-schema:
+      command: "vendor/bin/console propel:schema:copy"
+
+    propel-build:
+      command: "vendor/bin/console propel:model:build"
+
+    generate-entity-transfer:
+      command: "vendor/bin/console transfer:entity:generate"
+
+    setup-seach-create-source-map:
+      command: "vendor/bin/console search:setup:source-map"
+
   cache:
     router-cache-warmup-yves:
       command: "vendor/bin/yves router:cache:warm-up"
@@ -38,20 +50,11 @@ sections:
     propel-postgres-compatibility:
       command: "vendor/bin/console propel:pg-sql-compat"
 
-    propel-copy-schema:
-      command: "vendor/bin/console propel:schema:copy"
-
-    propel-build:
-      command: "vendor/bin/console propel:model:build"
-
     propel-diff:
       command: "vendor/bin/console propel:diff"
 
     propel-migrate:
       command: "vendor/bin/console propel:migrate"
-
-    generate-entity-transfer:
-      command: "vendor/bin/console transfer:entity:generate"
 
     init-database:
       command: "vendor/bin/console setup:init-db"
@@ -59,9 +62,6 @@ sections:
   setup-es:
     setup-search-create-sources:
       command: "vendor/bin/console search:setup:sources"
-
-      setup-seach-create-source-map:
-        command: "vendor/bin/console search:setup:source-map"
 
   setup-test:
     codeception-build:

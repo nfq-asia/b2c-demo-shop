@@ -14,6 +14,22 @@ env:
   DB_PASSWORD: secret
 
 jobs:
+  install-dependencies:
+    name: 'Install dependencies'
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          extensions: redis
+          ini-values: memory_limit=-1
+      - uses: actions/cache@v2
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+      - run: composer install --optimize-autoloader --no-interaction
+
   unit-tests:
     name: 'Run unit/functional tests'
     needs:
@@ -57,6 +73,8 @@ jobs:
 
   code-style:
     name: 'Check code style'
+    needs:
+      - install-dependencies
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
@@ -65,15 +83,23 @@ jobs:
           php-version: '7.4'
           extensions: redis
           ini-values: memory_limit=-1
-      - name: 'Prepare file system'
-        run: ./config/Shared/ci/ga/prepare_file_system.sh
+      - uses: actions/cache@v2
+        id: composer-cache
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+      - name: 'Composer install'
+        if: steps.composer-cache.outputs.cache-hit != 'true'
+        run: composer install --optimize-autoloader --no-interaction
       - name: 'Install project'
-        run: vendor/bin/install DE -r ci -s generate -s cache -s setup-test
+        run: vendor/bin/install DE -r ci -s generate -s setup-test
       - name: 'Run code:sniff:style'
         run: vendor/bin/console code:sniff:style
 
   code-architecture:
     name: 'Check code architecture'
+    needs:
+      - install-dependencies
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
@@ -82,15 +108,23 @@ jobs:
           php-version: '7.4'
           extensions: redis
           ini-values: memory_limit=-1
-      - name: 'Prepare file system'
-        run: ./config/Shared/ci/ga/prepare_file_system.sh
+      - uses: actions/cache@v2
+        id: composer-cache
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+      - name: 'Composer install'
+        if: steps.composer-cache.outputs.cache-hit != 'true'
+        run: composer install --optimize-autoloader --no-interaction
       - name: 'Install project'
-        run: vendor/bin/install DE -r ci -s generate -s cache -s setup-test
+        run: vendor/bin/install DE -r ci -s generate -s setup-test
       - name: 'Run code:sniff:architecture'
         run: vendor/bin/console code:sniff:architecture
 
   phpstan:
     name: 'Static analysis with PHPStan'
+    needs:
+      - install-dependencies
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
@@ -99,10 +133,16 @@ jobs:
           php-version: '7.4'
           extensions: redis
           ini-values: memory_limit=-1
-      - name: 'Prepare file system'
-        run: ./config/Shared/ci/ga/prepare_file_system.sh
+      - uses: actions/cache@v2
+        id: composer-cache
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+      - name: 'Composer install'
+        if: steps.composer-cache.outputs.cache-hit != 'true'
+        run: composer install --optimize-autoloader --no-interaction
       - name: 'Install project'
-        run: vendor/bin/install DE -r ci -s generate -s cache -s setup-test
+        run: vendor/bin/install DE -r ci -s generate -s setup-test
       - name: 'Run phpstan'
         run: php -d memory_limit=1024M vendor/bin/console code:phpstan
 
