@@ -77,6 +77,10 @@ sections:
     update-product-labels:
       command: "vendor/bin/console product-label:relations:update"
 
+  demodata-functional:
+    import-data:
+      command: "vendor/bin/console data:import --config=data/import/ci/functional.yaml"
+
   fixtures:
     fixtures:
       command: "vendor/bin/console code:fixtures"

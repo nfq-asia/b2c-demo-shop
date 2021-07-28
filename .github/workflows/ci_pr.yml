@@ -67,7 +67,7 @@ jobs:
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: composer install --optimize-autoloader --no-interaction
       - name: 'Install project'
-        run: vendor/bin/install DE -r ci -s generate -s cache -s database-migrate -s setup-test
+        run: vendor/bin/install DE -r ci -s generate -s cache -s database-migrate -s setup-test -s demodata-functional
       - name: 'Run tests'
         run: vendor/bin/codecept run -c codeception.ci.functional.yml
 
